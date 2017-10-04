@@ -34,7 +34,7 @@ contenido(T,F,C,X):-not(ground(F)),not(ground(C)),matriz(T,F1,C1),between(1,F1,N
 disponible(T,F,C):-not((not(contenido(T,F,C,_)),adyacenteEnRango(T,F,C,F1,C1),contenido(T,F1,C1,_))).
 
 %puedoColocar(+CantPiezas, ?Direccion, +Tablero, ?Fila, ?Columna)
-%puedoColocar(Cant,D,T,F,C):-mover(Cant,D,F,C,F1,C1),
+%puedoColocar(Cant,D,T,F,C):-mover(Cant,D,T,F,C).
 
 %ubicarBarcos(+Barcos, +?Tablero)
 
@@ -56,6 +56,9 @@ colocar(T,F,C,X):-valido(T,F,C),nth1(F,T,L),nth1(C,L,Y),X = Y.
 %obtener(+Tablero, +Fila, +Columna,-Contenido)
 obtener(T,F,C,X):-nth1(F,T,L),nth1(C,L,X).
 
+%mover(+Cantiad,+Direccion,+Tablero, +F1, +C1,-F2,-C2)
+mover(Cant,vertical,T,F,C):-foreach(between(F,F+Cant,X),not(contenido(T,X,C))).
+mover(Cant,horizontal,T,F,C):-foreach(between(C,C+Cant,X),not(contenido(T,F,X))).
 
 %------------------Tests:------------------%
 
