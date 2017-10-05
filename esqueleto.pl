@@ -40,9 +40,10 @@ puedoColocar(Cant,D,T,F,C):-not(ground(C)),ground(F),matriz(T,_,C1),between(1,C1
 puedoColocar(Cant,D,T,F,C):-not(ground(F)),not(ground(C)),matriz(T,F1,C1),between(1,F1,F),between(1,C1,C),mover(Cant,D,T,F,C).
 
 %ubicarBarcos(+Barcos, +?Tablero)
+ubicarBarcos([],_).
+ubicarBarcos([X|Xs],T):-puedoColocar(X,D,T,F,C),ubicarBarco(X,D,T,F,C),ubicarBarcos(Xs,T).
 
 %completarConAgua(+?Tablero)
-completarConAgua(T):-forall(libre(T,X,Y),contenido(T,X,Y,"~")).
 
 %golpear(+Tablero, +NumFila, +NumColumna, -NuevoTab)
 
@@ -60,9 +61,16 @@ libre(T,F,C):-contenido(T,F,C,Y),not(ground(Y)).
 %obtener(+Tablero, +Fila, +Columna,-Contenido)
 obtener(T,F,C,X):-nth1(F,T,L),nth1(C,L,X).
 
-%mover(+Cantiad,+Direccion,+Tablero, +F1, +C1)
+%mover(?Cantiad,?Direccion,+?Tablero, ?Fila, ?Ccolumna)
 mover(Cant,vertical,T,F,C):-F1 is F+Cant-1,forall(between(F,F1,X),disponible(T,X,C)).
 mover(Cant,horizontal,T,F,C):-C1 is C+Cant-1,forall(between(C,C1,X),disponible(T,F,X)).
+
+%ubicarBarcos(+Cantidad,+Direccion,+?Tablero,+Fila,+Columna), como precondicion se tiene que poder ubicar en un lugar valido
+ubicarBarco(0,_,_,_,_).
+ubicarBarco(Cant,vertical,T,F,C):-contenido(T,F,C,o),Cant1 is Cant-1,F1 is F+1,ubicarBarco(Cant1,vertical,T,F1,C).
+ubicarBarco(Cant,horizontal,T,F,C):-contenido(T,F,C,o),Cant1 is Cant-1,C1 is C+1,ubicarBarco(Cant1,horizontal,T,F,C1).
+
+%ubicarAgua(+?Tablero)
 
 %------------------Tests:------------------%
 
