@@ -25,30 +25,38 @@ adyacenteEnRango(T,F1,C1,F2,C2) :- adyacente(F1,C1,F2,C2), enRango(T,F2,C2).
 
 
 %contenido(+?Tablero, ?Fila, ?Columna, ?Contenido)
-contenido(T,F,C,X):-valido(T,F,C),obtener(T,F,C,X).
 contenido(T,F,C,X):-not(ground(F)),ground(C),matriz(T,F1,_),between(1,F1,F),obtener(T,F,C,X).
 contenido(T,F,C,X):-not(ground(C)),ground(F),matriz(T,_,C1),between(1,C1,C),obtener(T,F,C,X).
 contenido(T,F,C,X):-not(ground(F)),not(ground(C)),matriz(T,F1,C1),between(1,F1,F),between(1,C1,C),obtener(T,F,C,X).
+contenido(T,F,C,X):-valido(T,F,C),obtener(T,F,C,X).
 
 %disponible(+Tablero, ?Fila, ?Columna)
 disponible(T,F,C):-valido(T,F,C),libre(T,F,C),forall(adyacenteEnRango(T,F,C,F1,C1),libre(T,F1,C1)).
 
 %puedoColocar(+CantPiezas, ?Direccion, +Tablero, ?Fila, ?Columna)
+puedoColocar(Cant,D,T,F,C):-var(F),nonvar(C),matriz(T,F1,_),between(1,F1,F),mover(Cant,D,T,F,C).
+puedoColocar(Cant,D,T,F,C):-var(C),nonvar(F),matriz(T,_,C1),between(1,C1,C), mover(Cant,D,T,F,C).
+puedoColocar(Cant,D,T,F,C):-var(F),var(C),matriz(T,F1,C1),between(1,F1,F),between(1,C1,C),mover(Cant,D,T,F,C).
 puedoColocar(Cant,D,T,F,C):-valido(T,F,C),mover(Cant,D,T,F,C).
-puedoColocar(Cant,D,T,F,C):-not(ground(F)),ground(C),matriz(T,F1,_),between(1,F1,F),mover(Cant,D,T,F,C).
-puedoColocar(Cant,D,T,F,C):-not(ground(C)),ground(F),matriz(T,_,C1),between(1,C1,C), mover(Cant,D,T,F,C).
-puedoColocar(Cant,D,T,F,C):-not(ground(F)),not(ground(C)),matriz(T,F1,C1),between(1,F1,F),between(1,C1,C),mover(Cant,D,T,F,C).
+
 
 %ubicarBarcos(+Barcos, +?Tablero)
 ubicarBarcos([],_).
-ubicarBarcos([X|Xs],T):-puedoColocar(X,D,T,F,C),ubicarBarco(X,D,T,F,C),ubicarBarcos(Xs,T).
+ubicarBarcos([1|Xs],T):-puedoColocar(1,vertical,T,F,C),contenido(T,F,C,o),ubicarBarcos(Xs,T).
+ubicarBarcos([X|Xs],T):-X\=1,puedoColocar(X,D,T,F,C),ubicarBarco(X,D,T,F,C),ubicarBarcos(Xs,T).
 
-%completarConAgua(+?Tablero)
+%completarConAgua(+?Tablero) 
+completarConAgua(T):-libre(T,F,C),ubicarAgua(T,F,C),continuar(T,F,C),completarConAgua(T).
+completarConAgua(T):-not(libre(T,_,_)).
 
 %golpear(+Tablero, +NumFila, +NumColumna, -NuevoTab)
+golpear(T,F,C,X):-valido(T,F,C),matriz(T,F1,C1),matriz(X,F1,C1),ubicarAgua(X,F,C),copiar(T,X).
 
-% Completar instanciación soportada y justificar.
-%atacar(Tablero, Fila, Columna, Resultado, NuevoTab)
+% Completar instanciación soportada & justificar.
+%atacar(+Tablero, +Fila, +Columna, -Resultado, -NuevoTab)
+atacar(T,F,C,agua,T):-valido(T,F,C),contenido(T,F,C,~).
+atacar(T,F,C,hundido,N):-valido(T,F,C),contenido(T,F,C,o),forall(adyacenteEnRango(T,F,C,F1,C1),contenido(T,F1,C1,~)),golpear(T,F,C,N).
+atacar(T,F,C,tocado,N):-not(atacar(T,F,C,agua,N)),not(atacar(T,F,C,hundido,N)),golpear(T,F,C,N).
 
 %------------------Predicados auxiliares:------------------%
 
@@ -61,16 +69,23 @@ libre(T,F,C):-contenido(T,F,C,Y),not(ground(Y)).
 %obtener(+Tablero, +Fila, +Columna,-Contenido)
 obtener(T,F,C,X):-nth1(F,T,L),nth1(C,L,X).
 
-%mover(?Cantiad,?Direccion,+?Tablero, ?Fila, ?Ccolumna)
+%mover(+Cantidad,?Direccion,+?Tablero, ?Fila, ?Columna)
 mover(Cant,vertical,T,F,C):-F1 is F+Cant-1,forall(between(F,F1,X),disponible(T,X,C)).
 mover(Cant,horizontal,T,F,C):-C1 is C+Cant-1,forall(between(C,C1,X),disponible(T,F,X)).
 
-%ubicarBarcos(+Cantidad,+Direccion,+?Tablero,+Fila,+Columna), como precondicion se tiene que poder ubicar en un lugar valido
-ubicarBarco(0,_,_,_,_).
+%ubicarBarco(+Cantidad,+Direccion,+?Tablero,+Fila,+Columna), como precondicion se tiene que poder ubicar en un lugar valido
+ubicarBarco(1,_,T,F,C):-contenido(T,F,C,o).
 ubicarBarco(Cant,vertical,T,F,C):-contenido(T,F,C,o),Cant1 is Cant-1,F1 is F+1,ubicarBarco(Cant1,vertical,T,F1,C).
 ubicarBarco(Cant,horizontal,T,F,C):-contenido(T,F,C,o),Cant1 is Cant-1,C1 is C+1,ubicarBarco(Cant1,horizontal,T,F,C1).
 
-%ubicarAgua(+?Tablero)
+%ubicarAgua(+?Tablero,+Fila,+Columna)
+ubicarAgua(T,F,C):-contenido(T,F,C,~).
+
+%continuar(+tablero,+Fila,+Columna) Verifica que n haga espacios libres antes de la pos (fila,columna)
+continuar(T,F,C):-F1 is F-1,forall((between(1,F1,F2)),(nth1(F2,T,X),ground(X))),forall(between(1,C,C1),not(libre(T,F,C1))).
+
+copiar(_,X):-not(libre(X,_,_)).
+copiar(T,X):-libre(X,F,C),contenido(T,F,C,Y),contenido(X,F,C,Y),continuar(X,F,C),copiar(T,X).
 
 %------------------Tests:------------------%
 
