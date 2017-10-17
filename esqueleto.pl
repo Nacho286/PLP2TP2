@@ -31,7 +31,11 @@ contenido(T,F,C,X):-not(ground(F)),not(ground(C)),matriz(T,F1,C1),between(1,F1,F
 contenido(T,F,C,X):-valido(T,F,C),obtener(T,F,C,X).
 
 %disponible(+Tablero, ?Fila, ?Columna)
+disponible(T,F,C):-var(F),nonvar(C),matriz(T,F1,_),between(1,F1,F),disponible(T,F1,C).
+disponible(T,F,C):-var(C),nonvar(F),matriz(T,_,C1),between(1,C1,C), disponible(T,F,C1).
+disponible(T,F,C):-var(F),var(C),matriz(T,F1,C1),between(1,F1,F),between(1,C1,C),disponible(T,F1,C1).
 disponible(T,F,C):-valido(T,F,C),libre(T,F,C),forall(adyacenteEnRango(T,F,C,F1,C1),libre(T,F1,C1)).
+
 
 %puedoColocar(+CantPiezas, ?Direccion, +Tablero, ?Fila, ?Columna)
 puedoColocar(Cant,D,T,F,C):-var(F),nonvar(C),matriz(T,F1,_),between(1,F1,F),mover(Cant,D,T,F,C).
@@ -95,4 +99,5 @@ copiar(T,X):-libre(X,F,C),contenido(T,F,C,Y),contenido(X,F,C,Y),continuar(X,F,C)
 
 test(1) :- matriz(M,2,3), adyacenteEnRango(M,2,2,2,3).
 test(2) :- matriz(M,2,3), setof((F,C), adyacenteEnRango(M,1,1,F,C), [ (1, 2), (2, 1), (2, 2)]).
-tests :- forall(between(1,2,N), test(N)). % Cambiar el 2 por la cantidad de tests que tengan.
+test(3) :-contenido([[o, ~], [o, ~], [o, ~]],1,1,o).
+tests :- forall(between(1,3,N), test(N)). % Cambiar el 2 por la cantidad de tests que tengan.
