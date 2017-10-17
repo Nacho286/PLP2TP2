@@ -49,7 +49,7 @@ ubicarBarcos([],_).
 ubicarBarcos([1|Xs],T):-puedoColocar(1,vertical,T,F,C),contenido(T,F,C,o),ubicarBarcos(Xs,T).
 ubicarBarcos([X|Xs],T):-X\=1,puedoColocar(X,D,T,F,C),ubicarBarco(X,D,T,F,C),ubicarBarcos(Xs,T).
 
-%completarConAgua(+?Tablero) 
+%completarConAgua(+?Tablero)
 completarConAgua(T):-libre(T,F,C),ubicarAgua(T,F,C),continuar(T,F,C),completarConAgua(T).
 completarConAgua(T):-not(libre(T,_,_)).
 
@@ -64,7 +64,7 @@ atacar(T,F,C,tocado,N):-not(atacar(T,F,C,agua,N)),not(atacar(T,F,C,hundido,N)),g
 
 
 %Los parametros no son reversibles. En caso de que no se ingrese un tablero al cual golpear se tendria que ingresar el ultimo parametro para saber como es el tablero que se devuelve. Igualmente, en ese caso se va colgar y no termina por que intenta crear todas las matrices posibles, ya que el predicado depende de la matriz de entrada y no de la de salida. Por esa misma razon aunque se pase un resultado, no va a poder recrear el tablero original.
-%En caso de que no se pase una fila o columna no va a funcionar ya que lo primero que se fija antes de atacar es que sea una posicion valida, lo cual necesita que las filas y columnas esten instanciadas  
+%En caso de que no se pase una fila o columna no va a funcionar ya que lo primero que se fija antes de atacar es que sea una posicion valida, lo cual necesita que las filas y columnas esten instanciadas
 
 %------------------Predicados auxiliares:------------------%
 
@@ -102,4 +102,9 @@ test(2) :- matriz(M,2,3), setof((F,C), adyacenteEnRango(M,1,1,F,C), [ (1, 2), (2
 test(3) :-contenido([[o, ~], [o, ~], [o, ~]],1,1,o).
 test(4) :- matriz(M,3,3), setof((F,C), disponible(M,F,C), [ (1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3)]).
 test(5) :- matriz(M,3,3), contenido(M,1,1,o),contenido(M,3,1,o),setof((F,C),puedoColocar(2,_,M,F,C), [(1, 3), (2, 3)]).
-tests :- forall(between(1,5,N), test(N)). % Cambiar el 2 por la cantidad de tests que tengan.
+test(6) :- matriz(M,3,3),ubicarBarco(3,vertical,M,1,1),completarConAgua(M),golpear(M,1,1,[[~, ~, ~], [o, ~, ~], [o, ~, ~]]).
+test(7) :- matriz(M,3,3),contenido(M,3,3,o),ubicarBarco(3,vertical,M,1,1),completarConAgua(M),setof((Res,T),atacar(M,1,1,Res,T),[(tocado , [[~, ~, ~], [o, ~, ~], [o, ~, o]])]).
+test(8) :- matriz(M,3,3),contenido(M,3,3,o),ubicarBarco(3,vertical,M,1,1),completarConAgua(M),setof((Res,T),atacar(M,2,2,Res,T),[(agua , [[o, ~, ~], [o, ~, ~], [o, ~, o]])]).
+test(9) :- matriz(M,3,3),contenido(M,3,3,o),ubicarBarco(3,vertical,M,1,1),completarConAgua(M),setof((Res,T),atacar(M,3,3,Res,T),[(hundido , [[o, ~, ~], [o, ~, ~], [o, ~,  ~]])]).
+test(9) :- matriz(M,3,3),contenido(M,3,3,o),ubicarBarco(3,vertical,M,1,1),completarConAgua(M),setof((Res,T),(atacar(M,1,1,Res,M1),atacar(M1,2,1,Res,M2),atacar(M2,3,1,Res,T)),[(hundido , [[~, ~, ~], [~, ~, ~], [~, ~, o]])]).
+tests :- forall(between(1,7,N), test(N)). % Cambiar el 2 por la cantidad de tests que tengan.
