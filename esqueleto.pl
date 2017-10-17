@@ -58,6 +58,10 @@ atacar(T,F,C,agua,T):-valido(T,F,C),contenido(T,F,C,~).
 atacar(T,F,C,hundido,N):-valido(T,F,C),contenido(T,F,C,o),forall(adyacenteEnRango(T,F,C,F1,C1),contenido(T,F1,C1,~)),golpear(T,F,C,N).
 atacar(T,F,C,tocado,N):-not(atacar(T,F,C,agua,N)),not(atacar(T,F,C,hundido,N)),golpear(T,F,C,N).
 
+
+%Los parametros no son reversibles. En caso de que no se ingrese un tablero al cual golpear se tendria que ingresar el ultimo parametro para saber como es el tablero que se devuelve. Igualmente, en ese caso se va colgar y no termina por que intenta crear todas las matrices posibles, ya que el predicado depende de la matriz de entrada y no de la de salida. Por esa misma razon aunque se pase un resultado, no va a poder recrear el tablero original.
+%En caso de que no se pase una fila o columna no va a funcionar ya que lo primero que se fija antes de atacar es que sea una posicion valida, lo cual necesita que las filas y columnas esten instanciadas  
+
 %------------------Predicados auxiliares:------------------%
 
 %valido(+?Tablero, ?Fila, ?Columna)
