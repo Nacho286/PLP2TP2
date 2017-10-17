@@ -100,4 +100,6 @@ copiar(T,X):-libre(X,F,C),contenido(T,F,C,Y),contenido(X,F,C,Y),continuar(X,F,C)
 test(1) :- matriz(M,2,3), adyacenteEnRango(M,2,2,2,3).
 test(2) :- matriz(M,2,3), setof((F,C), adyacenteEnRango(M,1,1,F,C), [ (1, 2), (2, 1), (2, 2)]).
 test(3) :-contenido([[o, ~], [o, ~], [o, ~]],1,1,o).
-tests :- forall(between(1,3,N), test(N)). % Cambiar el 2 por la cantidad de tests que tengan.
+test(4) :- matriz(M,3,3), setof((F,C), disponible(M,F,C), [ (1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3)]).
+test(5) :- matriz(M,3,3), contenido(M,1,1,o),contenido(M,3,1,o),setof((F,C),puedoColocar(2,_,M,F,C), [(1, 3), (2, 3)]).
+tests :- forall(between(1,5,N), test(N)). % Cambiar el 2 por la cantidad de tests que tengan.
