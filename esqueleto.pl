@@ -106,5 +106,5 @@ test(6) :- matriz(M,3,3),ubicarBarco(3,vertical,M,1,1),completarConAgua(M),golpe
 test(7) :- matriz(M,3,3),contenido(M,3,3,o),ubicarBarco(3,vertical,M,1,1),completarConAgua(M),setof((Res,T),atacar(M,1,1,Res,T),[(tocado , [[~, ~, ~], [o, ~, ~], [o, ~, o]])]).
 test(8) :- matriz(M,3,3),contenido(M,3,3,o),ubicarBarco(3,vertical,M,1,1),completarConAgua(M),setof((Res,T),atacar(M,2,2,Res,T),[(agua , [[o, ~, ~], [o, ~, ~], [o, ~, o]])]).
 test(9) :- matriz(M,3,3),contenido(M,3,3,o),ubicarBarco(3,vertical,M,1,1),completarConAgua(M),setof((Res,T),atacar(M,3,3,Res,T),[(hundido , [[o, ~, ~], [o, ~, ~], [o, ~,  ~]])]).
-test(9) :- matriz(M,3,3),contenido(M,3,3,o),ubicarBarco(3,vertical,M,1,1),completarConAgua(M),setof((Res,T),(atacar(M,1,1,Res,M1),atacar(M1,2,1,Res,M2),atacar(M2,3,1,Res,T)),[(hundido , [[~, ~, ~], [~, ~, ~], [~, ~, o]])]).
-tests :- forall(between(1,7,N), test(N)). % Cambiar el 2 por la cantidad de tests que tengan.
+test(10) :- matriz(M,3,3),contenido(M,3,3,o),ubicarBarco(3,vertical,M,1,1),completarConAgua(M),setof((Res,T),(atacar(M,1,1,_,M1),atacar(M1,2,1,_,M2),atacar(M2,3,1,Res,T)),[(hundido , [[~, ~, ~], [~, ~, ~], [~, ~, o]])]).
+tests :- forall(between(1,10,N), test(N)). % Cambiar el 2 por la cantidad de tests que tengan.
