@@ -25,16 +25,10 @@ adyacenteEnRango(T,F1,C1,F2,C2) :- adyacente(F1,C1,F2,C2), enRango(T,F2,C2).
 
 
 %contenido(+?Tablero, ?Fila, ?Columna, ?Contenido)
-contenido(T,F,C,X):-not(ground(F)),ground(C),matriz(T,F1,_),between(1,F1,F),obtener(T,F,C,X).
-contenido(T,F,C,X):-not(ground(C)),ground(F),matriz(T,_,C1),between(1,C1,C),obtener(T,F,C,X).
-contenido(T,F,C,X):-not(ground(F)),not(ground(C)),matriz(T,F1,C1),between(1,F1,F),between(1,C1,C),obtener(T,F,C,X).
-contenido(T,F,C,X):-valido(T,F,C),obtener(T,F,C,X).
+contenido(T,F,C,X):-rango(T,F,C),obtener(T,F,C,X).
 
 %disponible(+Tablero, ?Fila, ?Columna)
-disponible(T,F,C):-var(F),nonvar(C),matriz(T,F1,_),between(1,F1,F),disponible(T,F1,C).
-disponible(T,F,C):-var(C),nonvar(F),matriz(T,_,C1),between(1,C1,C), disponible(T,F,C1).
-disponible(T,F,C):-var(F),var(C),matriz(T,F1,C1),between(1,F1,F),between(1,C1,C),disponible(T,F1,C1).
-disponible(T,F,C):-valido(T,F,C),libre(T,F,C),forall(adyacenteEnRango(T,F,C,F1,C1),libre(T,F1,C1)).
+disponible(T,F,C):-rango(T,F,C),libre(T,F,C),forall(adyacenteEnRango(T,F,C,F1,C1),libre(T,F1,C1)).
 
 
 %puedoColocar(+CantPiezas, ?Direccion, +Tablero, ?Fila, ?Columna)
@@ -95,6 +89,8 @@ continuar(T,F,C):-F1 is F-1,forall((between(1,F1,F2)),(nth1(F2,T,X),ground(X))),
 copiar(_,X):-not(libre(X,_,_)).
 copiar(T,X):-libre(X,F,C),contenido(T,F,C,Y),contenido(X,F,C,Y),continuar(X,F,C),copiar(T,X).
 
+%rango(T,F,C)
+rango(T,F,C):- matriz(T,X,Y),between(1,X,F),between(1,Y,C).
 %------------------Tests:------------------%
 
 test(1) :- matriz(M,2,3), adyacenteEnRango(M,2,2,2,3).
