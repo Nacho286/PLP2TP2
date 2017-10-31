@@ -30,13 +30,8 @@ contenido(T,F,C,X):-rango(T,F,C),obtener(T,F,C,X).
 %disponible(+Tablero, ?Fila, ?Columna)
 disponible(T,F,C):-rango(T,F,C),libre(T,F,C),forall(adyacenteEnRango(T,F,C,F1,C1),libre(T,F1,C1)).
 
-
 %puedoColocar(+CantPiezas, ?Direccion, +Tablero, ?Fila, ?Columna)
-puedoColocar(Cant,D,T,F,C):-var(F),nonvar(C),matriz(T,F1,_),between(1,F1,F),mover(Cant,D,T,F,C).
-puedoColocar(Cant,D,T,F,C):-var(C),nonvar(F),matriz(T,_,C1),between(1,C1,C), mover(Cant,D,T,F,C).
-puedoColocar(Cant,D,T,F,C):-var(F),var(C),matriz(T,F1,C1),between(1,F1,F),between(1,C1,C),mover(Cant,D,T,F,C).
-puedoColocar(Cant,D,T,F,C):-valido(T,F,C),mover(Cant,D,T,F,C).
-
+puedoColocar(Cant,D,T,F,C):-rango(T,F,C),mover(Cant,D,T,F,C).
 
 %ubicarBarcos(+Barcos, +?Tablero)
 ubicarBarcos([],_).
@@ -52,9 +47,9 @@ golpear(T,F,C,X):-valido(T,F,C),matriz(T,F1,C1),matriz(X,F1,C1),ubicarAgua(X,F,C
 
 % Completar instanciación soportada & justificar.
 %atacar(+Tablero, +Fila, +Columna, -Resultado, -NuevoTab)
-atacar(T,F,C,agua,T):-valido(T,F,C),contenido(T,F,C,~).
-atacar(T,F,C,hundido,N):-valido(T,F,C),contenido(T,F,C,o),forall(adyacenteEnRango(T,F,C,F1,C1),contenido(T,F1,C1,~)),golpear(T,F,C,N).
-atacar(T,F,C,tocado,N):-not(atacar(T,F,C,agua,N)),not(atacar(T,F,C,hundido,N)),golpear(T,F,C,N).
+atacar(T,F,C,agua,T):-rango(T,F,C),contenido(T,F,C,~).
+atacar(T,F,C,hundido,N):-rango(T,F,C),contenido(T,F,C,o),forall(adyacenteEnRango(T,F,C,F1,C1),contenido(T,F1,C1,~)),golpear(T,F,C,N).
+atacar(T,F,C,tocado,N):-rango(T,F,C),contenido(T,F,C,o),adyacenteEnRango(T,F,C,F1,C1),contenido(T,F1,C1,o),!,golpear(T,F,C,N).
 
 
 %Los parametros no son reversibles. En caso de que no se ingrese un tablero al cual golpear se tendria que ingresar el ultimo parametro para saber como es el tablero que se devuelve. Igualmente, en ese caso se va colgar y no termina por que intenta crear todas las matrices posibles, ya que el predicado depende de la matriz de entrada y no de la de salida. Por esa misma razon aunque se pase un resultado, no va a poder recrear el tablero original.
