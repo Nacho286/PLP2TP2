@@ -28,7 +28,7 @@ adyacenteEnRango(T,F1,C1,F2,C2) :- adyacente(F1,C1,F2,C2), enRango(T,F2,C2).
 contenido(T,F,C,X):-rango(T,F,C),obtener(T,F,C,X).
 
 %disponible(+Tablero, ?Fila, ?Columna)
-disponible(T,F,C):-rango(T,F,C),libre(T,F,C),forall(adyacenteEnRango(T,F,C,F1,C1),libre(T,F1,C1)).
+disponible(T,F,C):-libre(T,F,C),forall(adyacenteEnRango(T,F,C,F1,C1),libre(T,F1,C1)).
 
 %puedoColocar(+CantPiezas, ?Direccion, +Tablero, ?Fila, ?Columna)
 puedoColocar(Cant,D,T,F,C):-rango(T,F,C),mover(Cant,D,T,F,C).
@@ -39,26 +39,24 @@ ubicarBarcos([1|Xs],T):-puedoColocar(1,vertical,T,F,C),contenido(T,F,C,o),ubicar
 ubicarBarcos([X|Xs],T):-X\=1,puedoColocar(X,D,T,F,C),ubicarBarco(X,D,T,F,C),ubicarBarcos(Xs,T).
 
 %completarConAgua(+?Tablero)
-completarConAgua(T):-libre(T,F,C),ubicarAgua(T,F,C),continuar(T,F,C),completarConAgua(T).
-completarConAgua(T):-not(libre(T,_,_)).
+%completarConAgua(T):-libre(T,F,C),ubicarAgua(T,F,C),continuar(T,F,C),completarConAgua(T).
+%completarConAgua(T):-not(libre(T,_,_)).
+completarConAgua(T) :- maplist(completarConAguaFila,T).
 
 %golpear(+Tablero, +NumFila, +NumColumna, -NuevoTab)
-golpear(T,F,C,X):-valido(T,F,C),matriz(T,F1,C1),matriz(X,F1,C1),ubicarAgua(X,F,C),copiar(T,X).
+golpear(T,F,C,X):-rango(T,F,C),matriz(T,F1,C1),matriz(X,F1,C1),contenido(X,F,C,~),maplist(copiarFila,T,X).
 
 % Completar instanciación soportada & justificar.
 %atacar(+Tablero, +Fila, +Columna, -Resultado, -NuevoTab)
-atacar(T,F,C,agua,T):-rango(T,F,C),contenido(T,F,C,~).
-atacar(T,F,C,hundido,N):-rango(T,F,C),contenido(T,F,C,o),forall(adyacenteEnRango(T,F,C,F1,C1),contenido(T,F1,C1,~)),golpear(T,F,C,N).
-atacar(T,F,C,tocado,N):-rango(T,F,C),contenido(T,F,C,o),adyacenteEnRango(T,F,C,F1,C1),contenido(T,F1,C1,o),!,golpear(T,F,C,N).
+atacar(T,F,C,agua,T):-contenido(T,F,C,~).
+atacar(T,F,C,hundido,N):-contenido(T,F,C,o),forall(adyacenteEnRango(T,F,C,F1,C1),contenido(T,F1,C1,~)),golpear(T,F,C,N).
+atacar(T,F,C,tocado,N):-contenido(T,F,C,o),adyacenteEnRango(T,F,C,F1,C1),contenido(T,F1,C1,o),!,golpear(T,F,C,N).
 
 
 %Los parametros no son reversibles. En caso de que no se ingrese un tablero al cual golpear se tendria que ingresar el ultimo parametro para saber como es el tablero que se devuelve. Igualmente, en ese caso se va colgar y no termina por que intenta crear todas las matrices posibles, ya que el predicado depende de la matriz de entrada y no de la de salida. Por esa misma razon aunque se pase un resultado, no va a poder recrear el tablero original.
 %En caso de que no se pase una fila o columna no va a funcionar ya que lo primero que se fija antes de atacar es que sea una posicion valida, lo cual necesita que las filas y columnas esten instanciadas
 
 %------------------Predicados auxiliares:------------------%
-
-%valido(+?Tablero, ?Fila, ?Columna)
-valido(T,F,C):-ground(F),ground(C),matriz(T,F1,C1),F=<F1,C=<C1.
 
 %libre(+?Tablero,?Fila,?Columna)
 libre(T,F,C):-contenido(T,F,C,Y),not(ground(Y)).
@@ -75,14 +73,22 @@ ubicarBarco(1,_,T,F,C):-contenido(T,F,C,o).
 ubicarBarco(Cant,vertical,T,F,C):-contenido(T,F,C,o),Cant1 is Cant-1,F1 is F+1,ubicarBarco(Cant1,vertical,T,F1,C).
 ubicarBarco(Cant,horizontal,T,F,C):-contenido(T,F,C,o),Cant1 is Cant-1,C1 is C+1,ubicarBarco(Cant1,horizontal,T,F,C1).
 
-%ubicarAgua(+?Tablero,+Fila,+Columna)
-ubicarAgua(T,F,C):-contenido(T,F,C,~).
+
+%completarConAguaFila(+?Lista)
+completarConAguaFila(L):-maplist(ubicarAgua,L).
+
+%ubicarAgua(?Var)
+ubicarAgua(V):-nonvar(V).
+ubicarAgua(V):-var(V), V = '~'.
 
 %continuar(+tablero,+Fila,+Columna) Verifica que n haga espacios libres antes de la pos (fila,columna)
 continuar(T,F,C):-F1 is F-1,forall((between(1,F1,F2)),(nth1(F2,T,X),ground(X))),forall(between(1,C,C1),not(libre(T,F,C1))).
 
-copiar(_,X):-not(libre(X,_,_)).
-copiar(T,X):-libre(X,F,C),contenido(T,F,C,Y),contenido(X,F,C,Y),continuar(X,F,C),copiar(T,X).
+
+copiarFila(T,X):-maplist(copiar,T,X).
+
+copiar(_,X):-nonvar(X).
+copiar(T,X):-var(X),T = X.
 
 %rango(T,F,C)
 rango(T,F,C):- matriz(T,X,Y),between(1,X,F),between(1,Y,C).
