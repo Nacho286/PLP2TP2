@@ -73,7 +73,6 @@ ubicarBarco(1,_,T,F,C):-contenido(T,F,C,o).
 ubicarBarco(Cant,vertical,T,F,C):-contenido(T,F,C,o),Cant1 is Cant-1,F1 is F+1,ubicarBarco(Cant1,vertical,T,F1,C).
 ubicarBarco(Cant,horizontal,T,F,C):-contenido(T,F,C,o),Cant1 is Cant-1,C1 is C+1,ubicarBarco(Cant1,horizontal,T,F,C1).
 
-
 %completarConAguaFila(+?Lista)
 completarConAguaFila(L):-maplist(ubicarAgua,L).
 
@@ -84,9 +83,10 @@ ubicarAgua(V):-var(V), V = '~'.
 %continuar(+tablero,+Fila,+Columna) Verifica que n haga espacios libres antes de la pos (fila,columna)
 continuar(T,F,C):-F1 is F-1,forall((between(1,F1,F2)),(nth1(F2,T,X),ground(X))),forall(between(1,C,C1),not(libre(T,F,C1))).
 
-
+%copiarFila(+Lista1,+?Lista2)
 copiarFila(T,X):-maplist(copiar,T,X).
 
+%copiar(+Var1,+?Var2)
 copiar(_,X):-nonvar(X).
 copiar(T,X):-var(X),T = X.
 
