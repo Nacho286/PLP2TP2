@@ -39,8 +39,6 @@ ubicarBarcos([1|Xs],T):-puedoColocar(1,vertical,T,F,C),contenido(T,F,C,o),ubicar
 ubicarBarcos([X|Xs],T):-X\=1,puedoColocar(X,D,T,F,C),ubicarBarco(X,D,T,F,C),ubicarBarcos(Xs,T).
 
 %completarConAgua(+?Tablero)
-%completarConAgua(T):-libre(T,F,C),ubicarAgua(T,F,C),continuar(T,F,C),completarConAgua(T).
-%completarConAgua(T):-not(libre(T,_,_)).
 completarConAgua(T) :- maplist(completarConAguaFila,T).
 
 %golpear(+Tablero, +NumFila, +NumColumna, -NuevoTab)
@@ -52,14 +50,14 @@ atacar(T,F,C,agua,T):-contenido(T,F,C,~).
 atacar(T,F,C,hundido,N):-contenido(T,F,C,o),forall(adyacenteEnRango(T,F,C,F1,C1),contenido(T,F1,C1,~)),golpear(T,F,C,N).
 atacar(T,F,C,tocado,N):-contenido(T,F,C,o),adyacenteEnRango(T,F,C,F1,C1),contenido(T,F1,C1,o),!,golpear(T,F,C,N).
 
-
-%Los parametros no son reversibles. En caso de que no se ingrese un tablero al cual golpear se tendria que ingresar el ultimo parametro para saber como es el tablero que se devuelve. Igualmente, en ese caso se va colgar y no termina por que intenta crear todas las matrices posibles, ya que el predicado depende de la matriz de entrada y no de la de salida. Por esa misma razon aunque se pase un resultado, no va a poder recrear el tablero original.
-%En caso de que no se pase una fila o columna no va a funcionar ya que lo primero que se fija antes de atacar es que sea una posicion valida, lo cual necesita que las filas y columnas esten instanciadas
-
+%las filas ,las columnas y el resultado pueden estar instanciados o no. Pero si se encuentra una respuesta en que res=="tocado" el programa va a terminar debido al cut.
+%En caso de que nada venga instanciado va a generar todas las matrices de 1 X N , con N en [1...] y siempre res va a ser "agua".
+%En el caso de que venga instanciado el NuevoTab pero no Tablero, cuando res sea "agua" no va a tener problema ya que NuevoTab es igual a Tablero, pero si
+%res no es "agua" se va a intentar crear todos los tableros posibles pero se va a trabar por que se van a crear todos los tableros que son de la forma 1xN,con N en [1...], por lo cual nunca va a terminar
 %------------------Predicados auxiliares:------------------%
 
 %libre(+?Tablero,?Fila,?Columna)
-libre(T,F,C):-contenido(T,F,C,Y),not(ground(Y)).
+libre(T,F,C):-contenido(T,F,C,Y),var(Y).
 
 %obtener(+Tablero, +Fila, +Columna,-Contenido)
 obtener(T,F,C,X):-nth1(F,T,L),nth1(C,L,X).
@@ -80,9 +78,6 @@ completarConAguaFila(L):-maplist(ubicarAgua,L).
 ubicarAgua(V):-nonvar(V).
 ubicarAgua(V):-var(V), V = '~'.
 
-%continuar(+tablero,+Fila,+Columna) Verifica que n haga espacios libres antes de la pos (fila,columna)
-continuar(T,F,C):-F1 is F-1,forall((between(1,F1,F2)),(nth1(F2,T,X),ground(X))),forall(between(1,C,C1),not(libre(T,F,C1))).
-
 %copiarFila(+Lista1,+?Lista2)
 copiarFila(T,X):-maplist(copiar,T,X).
 
@@ -90,7 +85,7 @@ copiarFila(T,X):-maplist(copiar,T,X).
 copiar(_,X):-nonvar(X).
 copiar(T,X):-var(X),T = X.
 
-%rango(T,F,C)
+%rango(+?T,?F,?C)
 rango(T,F,C):- matriz(T,X,Y),between(1,X,F),between(1,Y,C).
 %------------------Tests:------------------%
 
